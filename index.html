@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Snapshot: Liminal</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@300;400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+  /* --- پایهٔ تم Dreamcore (مثل قبل) --- */
+  :root{ --bg1:#06060a; --bg2:#111027; --card: rgba(18,18,30,0.6); --text:#e6e6ff; }
+  html,body{height:100%; margin:0; padding:18px; direction:rtl; font-family:'Vazirmatn',sans-serif; background:linear-gradient(180deg,var(--bg1),var(--bg2)); color:var(--text);}
+  .container{ max-width:980px; margin:0 auto; }
+  h1{ font-family:'Lalezar',cursive; font-size:28px; margin:6px 0 14px; text-align:center; }
+  .row{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  .card{ background:var(--card); border-radius:12px; padding:12px; min-width:260px; box-shadow:0 8px 30px rgba(0,0,0,0.6); }
+  #score{ font-size:28px; font-weight:700; text-align:center; margin-bottom:6px; }
+  #gameSkin{ width:170px; height:170px; border-radius:18px; margin:12px auto; display:flex; align-items:center; justify-content:center; font-size:74px; background:rgba(255,255,255,0.02); cursor:pointer; box-shadow:0 10px 40px rgba(120,80,220,0.06); }
+  button{ padding:8px 12px; border-radius:8px; border:none; background:rgba(255,255,255,0.03); color:var(--text); cursor:pointer; }
+  button.small{ padding:6px 8px; font-size:13px; }
+  .muted{ color:#bfbde7aa; font-size:13px; }
+  .shopList{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:8px; }
+  .skin{ width:86px; border-radius:10px; text-align:center; padding:8px; cursor:pointer; border:1px solid rgba(255,255,255,0.03); }
+  .skin .emoji{ font-size:30px; display:block; }
+  .skin.unlocked{ outline:2px solid rgba(150,110,255,0.12); }
+  #codeDisplay{ margin-top:10px; color:#aaf; font-size:14px; display:none; }
+  #codeDisplay strong{ letter-spacing:2px; font-size:16px; color:#fff; }
+  .copyMsg{ color:#9fe6a3; font-size:13px; margin-top:6px; display:none; }
+  select{ width:100%; padding:8px; border-radius:8px; background:rgba(255,255,255,0.02); color:var(--text); border:1px solid rgba(255,255,255,0.03); }
+  @media (max-width:720px){ .row{ flex-direction:column; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Snapshot: Liminal</h1>
+  <div id="score">0</div>
+
+  <div id="gameSkin">🌌</div>
+
+  <div class="row">
+    <!-- بازی / آپگریدها -->
+    <div class="card">
+      <div style="text-align:center;">
+        <button id="powerBtn">قدرت کلیک (+1) [15]</button>
+        <button id="doubleBtn">دابل ۳۰s [80]</button>
+        <button id="autoClickBtn">خرید کلیکر خودکار [50]</button>
+        <div id="doubleTimer" style="display:none; margin-top:8px;" class="muted">زمان باقی‌مانده: <span id="doubleLeft">0</span>s</div>
+      </div>
+
+      <hr style="margin:12px 0; border:none; border-top:1px solid rgba(255,255,255,0.03)">
+
+      <div>
+        <h4 style="margin:6px 0;">اسکین‌ها</h4>
+        <div id="skins" class="shopList">
+          <div class="skin" data-emoji="🌌" data-cost="0"><span class="emoji">🌌</span><div class="muted">آسمان بی‌پایان<br>رایگان</div></div>
+          <div class="skin" data-emoji="🪞" data-cost="60"><span class="emoji">🪞</span><div class="muted">آینه — ۶۰</div></div>
+          <div class="skin" data-emoji="🚪" data-cost="90"><span class="emoji">🚪</span><div class="muted">در — ۹۰</div></div>
+          <div class="skin" data-emoji="🕯️" data-cost="120"><span class="emoji">🕯️</span><div class="muted">شمع — ۱۲۰</div></div>
+          <div class="skin" data-emoji="🌀" data-cost="200"><span class="emoji">🌀</span><div class="muted">خلأ — ۲۰۰</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- موزیک -->
+    <div class="card">
+      <h4 style="margin:6px 0;">موزیک</h4>
+      <div class="muted">Ambient به‌صورت پیش‌فرض پخش می‌شود. پس از خرید رادیو، موزیک‌های زیر فعال می‌شوند.</div>
+      <div style="margin-top:8px;">
+        <button id="buyMusicBtn">خرید رادیو [120]</button>
+        <div style="margin-top:8px;">
+          <select id="musicList" disabled>
+            <option value="music1.mp3">آهنگ ۱</option>
+            <option value="music2.mp3">آهنگ ۲</option>
+            <option value="music3.mp3">آهنگ ۳</option>
+            <option value="music4.mp3">آهنگ ۴</option>
+            <option value="music5.mp3">آهنگ ۵</option>
+            <option value="music6.mp3">آهنگ ۶</option>
+          </select>
+          <div style="margin-top:8px;"><button id="playMusicBtn" disabled>پخش / توقف</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- فروشگاه -->
+    <div class="card">
+      <h4 style="margin:6px 0;">فروشگاه</h4>
+      <div class="shopList">
+        <div class="skin" id="houseItem" data-cost="100000"><span class="emoji">🏠</span><div class="muted">خانه — ۱۰۰٬۰۰۰</div></div>
+      </div>
+      <div id="codeDisplay" aria-live="polite">
+        <!-- کد و دکمه کپی اینجا قرار می‌گیرد -->
+      </div>
+      <div class="copyMsg" id="copyMsg">کد کپی شد!</div>
+    </div>
+
+    <!-- فونت و ذخیره -->
+    <div class="card">
+      <h4 style="margin:6px 0;">فونت‌ها & ذخیره</h4>
+      <div style="display:flex; flex-direction:column; gap:8px; align-items:center;">
+        <button class="fontBtn" data-font="'Lalezar', cursive" data-cost="160">فونت لِیزار [۱۶۰]</button>
+        <button class="fontBtn" data-font="'Vazirmatn', sans-serif" data-cost="0">فونت پیش‌فرض [رایگان]</button>
+        <button class="fontBtn" data-font="'Press Start 2P', monospace" data-cost="500">فونت مربعی/گلیچی [۵۰۰]</button>
+      </div>
+
+      <div style="margin-top:12px;">
+        <button id="saveBtn">ذخیره</button>
+        <button id="restartBtn">ریستارت</button>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align:center; margin-top:14px;" class="muted">نسخهٔ Snapshot — تم Liminal</footer>
+</div>
+
+<!-- صداها -->
+<audio id="ambient" loop preload="auto" src="ambient.mp3"></audio>
+<audio id="musicPlayer" preload="auto"></audio>
+<audio id="clickSound" preload="auto" src="click1.mp3"></audio>
+
+<script>
+/* ---------- وضعیت بازی ---------- */
+let score = 0;
+let clickPower = 1;
+let doubleActive = false;
+let doubleExpiresAt = 0;
+let musicUnlocked = false;
+let musicPlaying = false;
+let autoClickLevel = 0;
+let autoClickInterval = null;
+let houseCode = null;
+
+/* ---------- عناصر ---------- */
+const scoreEl = document.getElementById('score');
+const gameSkin = document.getElementById('gameSkin');
+const powerBtn = document.getElementById('powerBtn');
+const doubleBtn = document.getElementById('doubleBtn');
+const doubleTimer = document.getElementById('doubleTimer');
+const doubleLeft = document.getElementById('doubleLeft');
+const autoClickBtn = document.getElementById('autoClickBtn');
+const buyMusicBtn = document.getElementById('buyMusicBtn');
+const musicList = document.getElementById('musicList');
+const playMusicBtn = document.getElementById('playMusicBtn');
+const ambient = document.getElementById('ambient');
+const musicPlayer = document.getElementById('musicPlayer');
+const houseItem = document.getElementById('houseItem');
+const codeDisplay = document.getElementById('codeDisplay');
+const copyMsg = document.getElementById('copyMsg');
+const skinsContainer = document.getElementById('skins');
+const fontBtns = Array.from(document.querySelectorAll('.fontBtn'));
+const saveBtn = document.getElementById('saveBtn');
+const restartBtn = document.getElementById('restartBtn');
+const clickSound = document.getElementById('clickSound');
+
+/* ---------- کمکی ---------- */
+function fmt(n){ return n>=1000 ? (n/1000).toFixed(1)+'k' : String(Math.floor(n)); }
+function refreshScore(){ scoreEl.textContent = fmt(score); }
+
+/* ---------- کلیک دستی ---------- */
+gameSkin.addEventListener('click', (e)=>{
+  score += clickPower;
+  refreshScore();
+  try{ clickSound.currentTime = 0; clickSound.play().catch(()=>{}); }catch(e){}
+  // ripple ساده
+  const r = document.createElement('span');
+  r.style.position='absolute'; r.style.width=r.style.height='140px'; r.style.borderRadius='50%';
+  r.style.left=(e.offsetX)+'px'; r.style.top=(e.offsetY)+'px';
+  r.style.transform='translate(-50%,-50%) scale(0.1)'; r.style.background='radial-gradient(circle, rgba(150,110,255,0.26), transparent 40%)';
+  r.style.pointerEvents='none'; r.style.animation='ripple 700ms forwards';
+  gameSkin.appendChild(r);
+  r.addEventListener('animationend', ()=> r.remove());
+});
+/* ripple keyframes injection (so it works even if CSS above didn't include it) */
+const style = document.createElement('style'); style.textContent = "@keyframes ripple{ to{ transform:translate(-50%,-50%) scale(2.6); opacity:0;} }"; document.head.appendChild(style);
+
+/* ---------- اسکین‌ها (بازگشت) ---------- */
+function skinsList(){
+  return Array.from(skinsContainer.querySelectorAll('.skin'));
+}
+skinsList().forEach(skin=>{
+  skin.addEventListener('click', ()=>{
+    const emoji = skin.dataset.emoji;
+    const cost = Number(skin.dataset.cost) || 0;
+    if(skin.classList.contains('unlocked') || cost === 0){
+      // انتخاب اسکین
+      gameSkin.textContent = emoji;
+      // انیمیشن تأییدی
+      gameSkin.animate([{transform:'scale(1)'},{transform:'scale(0.96)'},{transform:'scale(1)'}],{duration:200});
+      saveGame();
+      return;
+    }
+    if(score >= cost){
+      score -= cost; refreshScore();
+      skin.classList.add('unlocked');
+      // خود به خود اسکین انتخاب شود
+      gameSkin.textContent = emoji;
+      saveGame();
+      // نمایش پیغام درون صفحه (بدون alert) — کوتاه
+      const tmp = document.createElement('div'); tmp.textContent = 'اسکین خریده شد'; tmp.className='muted'; skin.appendChild(tmp);
+      setTimeout(()=> tmp.remove(), 1100);
+    } else {
+      // پیغام روی صفحه در صورت ناکافی بودن
+      const tmp = document.createElement('div'); tmp.textContent = 'امتیاز کافی نیست'; tmp.className='muted'; skin.appendChild(tmp);
+      setTimeout(()=> tmp.remove(), 1100);
+    }
+  });
+});
+
+/* ---------- ارتقا قدرت کلیک ---------- */
+powerBtn.addEventListener('click', ()=>{
+  const COST = 15;
+  if(score >= COST){ score -= COST; clickPower++; refreshScore(); saveGame(); alert('قدرت کلیک بیشتر شد!'); }
+  else alert('امتیاز کافی نداری.');
+});
+
+/* ---------- دابل کلیکر ---------- */
+doubleBtn.addEventListener('click', ()=>{
+  const COST = 80;
+  if(doubleActive){ alert('دابل فعاله'); return; }
+  if(score >= COST){
+    score -= COST; refreshScore();
+    doubleActive = true; doubleExpiresAt = Date.now() + 30_000;
+    clickPower *= 2; doubleTimer.style.display='block'; saveGame();
+    alert('دابل فعال شد!');
+  } else alert('امتیاز کافی نداری.');
+});
+setInterval(()=>{
+  if(doubleActive){
+    const left = Math.max(0, Math.ceil((doubleExpiresAt - Date.now())/1000));
+    doubleLeft.textContent = left;
+    if(left <= 0){ doubleActive=false; clickPower = Math.max(1, Math.floor(clickPower/2)); doubleTimer.style.display='none'; saveGame(); }
+  }
+}, 500);
+
+/* ---------- کلیکر خودکار ---------- */
+function autoClickCost(level){ return 50 * (level + 1); }
+function refreshAutoBtn(){ autoClickBtn.textContent = autoClickLevel === 0 ? `خرید کلیکر خودکار [${autoClickCost(0)}]` : `ارتقا خودکار (سطح ${autoClickLevel}) [${autoClickCost(autoClickLevel)}]`; }
+refreshAutoBtn();
+autoClickBtn.addEventListener('click', ()=>{
+  const cost = autoClickCost(autoClickLevel);
+  if(score >= cost){
+    score -= cost; autoClickLevel++; refreshAutoBtn(); startAutoClicker(); refreshScore(); saveGame();
+    alert('کلیکر خودکار ارتقا یافت!');
+  } else alert('امتیاز کافی نداری.');
+});
+function startAutoClicker(){
+  if(autoClickInterval) clearInterval(autoClickInterval);
+  const interval = Math.max(400, 2000 - (autoClickLevel - 1) * 300);
+  autoClickInterval = setInterval(()=>{ score += clickPower; refreshScore(); }, interval);
+}
+
+/* ---------- موزیک (Ambient پیش‌فرض) ---------- */
+const COST_MUSIC = 120;
+buyMusicBtn.addEventListener('click', ()=>{
+  if(musicUnlocked){ /* در صورت نیاز می‌توان پیغام درون صفحه نشان داد */ return; }
+  if(score >= COST_MUSIC){
+    score -= COST_MUSIC; refreshScore();
+    musicUnlocked = true;
+    ambient.pause(); // قطع ambient
+    musicList.disabled = false; playMusicBtn.disabled = false;
+    saveGame();
+    // نمایش کوتاه داخل کارت
+    const tmp = document.createElement('div'); tmp.textContent = 'رادیو خریداری شد'; tmp.className='muted';
+    buyMusicBtn.parentElement.appendChild(tmp); setTimeout(()=> tmp.remove(), 1200);
+  } else {
+    const tmp = document.createElement('div'); tmp.textContent = 'امتیاز کافی نیست'; tmp.className='muted';
+    buyMusicBtn.parentElement.appendChild(tmp); setTimeout(()=> tmp.remove(), 1200);
+  }
+});
+musicList.addEventListener('change', ()=>{ musicPlayer.src = musicList.value; if(musicPlaying) musicPlayer.play(); });
+playMusicBtn.addEventListener('click', ()=>{
+  if(!musicUnlocked) return;
+  if(musicPlaying){ musicPlayer.pause(); musicPlaying = false; playMusicBtn.textContent = 'پخش / توقف'; }
+  else { musicPlayer.play().catch(()=>{}); musicPlaying = true; playMusicBtn.textContent = 'توقف'; }
+});
+
+/* ---------- فروشگاه: خانه — نمایش کد داخل سایت (بدون alert/رفتن به صفحه) ---------- */
+houseItem.addEventListener('click', ()=>{
+  const cost = Number(houseItem.dataset.cost) || 0;
+  if(houseItem.classList.contains('unlocked')) {
+    // اگر قبلاً خرید شده، فقط کد را نشان بده (اگر موجود است)
+    if(houseCode) showHouseCode(houseCode);
+    return;
+  }
+  if(score >= cost){
+    score -= cost; refreshScore();
+    houseItem.classList.add('unlocked');
+    houseCode = Math.floor(1000 + Math.random() * 9000);
+    showHouseCode(houseCode);
+    saveGame();
+    // توجه: اینجا از alert استفاده نمی‌کنیم (برای سازگاری با مینی‌اپ)
+  } else {
+    // پیام کوتاه درون کارت (نه alert)
+    const tmp = document.createElement('div'); tmp.textContent = 'امتیاز کافی نیست'; tmp.className='muted';
+    houseItem.appendChild(tmp); setTimeout(()=> tmp.remove(), 1100);
+  }
+});
+
+function showHouseCode(code){
+  codeDisplay.style.display = 'block';
+  codeDisplay.innerHTML = `کد ویژه شما: <strong id="houseCodeValue">${code}</strong> <button id="copyCodeBtn" class="small">کپی</button>`;
+  // دکمه کپی
+  const copyBtn = document.getElementById('copyCodeBtn');
+  copyBtn.addEventListener('click', async ()=>{
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(String(code));
+      } else {
+        // fallback
+        const ta = document.createElement('textarea'); ta.value = String(code); document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy'); ta.remove();
+      }
+      copyMsg.style.display = 'block';
+      setTimeout(()=> copyMsg.style.display = 'none', 1400);
+    }catch(e){
+      // در مینی‌اپ‌ها ممکنه دسترسی نباشه — به کاربر پیام درون صفحه بدیم
+      const tmp = document.createElement('div'); tmp.textContent = 'امکان کپی وجود ندارد'; tmp.className='muted';
+      codeDisplay.appendChild(tmp); setTimeout(()=> tmp.remove(), 1400);
+    }
+  }, { once:true });
+}
+
+/* ---------- فونت‌ها ---------- */
+fontBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const cost = Number(btn.dataset.cost) || 0;
+    const f = btn.dataset.font;
+    if(cost > 0 && score < cost){
+      const tmp = document.createElement('div'); tmp.textContent = 'امتیاز کافی نیست'; tmp.className='muted';
+      btn.parentElement.appendChild(tmp); setTimeout(()=> tmp.remove(), 1100);
+      return;
+    }
+    if(cost > 0){ score -= cost; refreshScore(); }
+    document.body.style.fontFamily = f;
+    saveGame();
+    const tmp = document.createElement('div'); tmp.textContent = 'فونت اعمال شد'; tmp.className='muted';
+    btn.parentElement.appendChild(tmp); setTimeout(()=> tmp.remove(), 900);
+  });
+});
+
+/* ---------- ذخیره / بارگذاری ---------- */
+function saveGame(){
+  try{
+    const unlockedSkins = skinsList().filter(s=>s.classList.contains('unlocked')).map(s=>s.dataset.emoji);
+    const data = {
+      score, clickPower, doubleActive, doubleExpiresAt, musicUnlocked, autoClickLevel,
+      houseUnlocked: houseItem.classList.contains('unlocked'), houseCode,
+      unlockedSkins, currentSkin: gameSkin.textContent, font: document.body.style.fontFamily || ''
+    };
+    localStorage.setItem('snapshot_save', JSON.stringify(data));
+  }catch(e){ console.warn('save err', e); }
+}
+function loadGame(){
+  try{
+    const raw = localStorage.getItem('snapshot_save'); if(!raw) return;
+    const d = JSON.parse(raw);
+    score = Number(d.score) || 0;
+    clickPower = Number(d.clickPower) || 1;
+    doubleActive = !!d.doubleActive; doubleExpiresAt = d.doubleExpiresAt || 0;
+    musicUnlocked = !!d.musicUnlocked; autoClickLevel = Number(d.autoClickLevel) || 0;
+    if(d.houseUnlocked){ houseItem.classList.add('unlocked'); houseCode = d.houseCode || null; if(houseCode) showHouseCode(houseCode); }
+    if(Array.isArray(d.unlockedSkins)){
+      skinsList().forEach(s => { if(d.unlockedSkins.includes(s.dataset.emoji)) s.classList.add('unlocked'); });
+    }
+    if(d.currentSkin) gameSkin.textContent = d.currentSkin;
+    if(d.font) document.body.style.fontFamily = d.font;
+    refreshScore(); refreshAutoBtn();
+    if(autoClickLevel > 0) startAutoClicker();
+    if(musicUnlocked){ musicList.disabled = false; playMusicBtn.disabled = false; ambient.pause(); }
+    // اگر دابل قبلاً فعال بوده و هنوز زمان مونده، نشون بده
+    if(doubleActive && Date.now() < (doubleExpiresAt || 0)){ doubleTimer.style.display='block'; }
+    else { doubleActive = false; }
+  }catch(e){ console.warn('load err', e); }
+}
+
+/* ---------- دکمه‌های ذخیره و ریستارت ---------- */
+saveBtn.addEventListener('click', ()=>{ saveGame(); const tmp = document.createElement('div'); tmp.textContent = 'ذخیره شد'; tmp.className='muted'; saveBtn.parentElement.appendChild(tmp); setTimeout(()=> tmp.remove(), 900); });
+restartBtn.addEventListener('click', ()=>{ if(confirm('ریست؟')){ localStorage.removeItem('snapshot_save'); location.reload(); } });
+
+/* ---------- شروع ---------- */
+window.addEventListener('load', ()=>{
+  ambient.volume = 0.55;
+  ambient.play().catch(()=>{}); // ممکنه autoplay بلاک باشه در مرورگرها/مینی‌اپ‌ها
+  loadGame();
+});
+// ذخیره دوره‌ای
+setInterval(saveGame, 15000);
+</script>
+</body>
+</html>
